@@ -3,6 +3,7 @@
  */
 package compiladores;
 import java.io.BufferedReader; 
+import java.io.File;
 import java.io.FileNotFoundException; 
 import java.io.FileReader; 
 import java.io.IOException; 
@@ -12,15 +13,18 @@ import java.io.IOException;
  */
 public class ExtraerDeTxt {
 //    public static void main(String[] args) throws FileNotFoundException, IOException{
-//        //System.out.println("HOLA MUNDO");
-//        String cadena;
-//        FileReader file = new FileReader("C:\\Users\\guija\\Desktop\\Cadenas.txt");
-//        BufferedReader buffered = new BufferedReader(file); 
-//        cadena = buffered.readLine();
-//        buffered.close();
-//        char [] tempChar = cadena.toCharArray();        
-//        //int tamaño = cadena.length();
-//        System.out.println(cadena);
-//        System.out.println(tempChar[0]);
-//    }
-}
+//        char [] tempRenglon;  
+//        File archivo = null;
+//        FileReader fr = null;
+//        BufferedReader br = null;
+//             archivo = new File ("C:\\Users\\guija\\OneDrive\\Escritorio\\Cadenas.txt");
+//             fr = new FileReader (archivo);
+//             br = new BufferedReader(fr);
+//             String cadenaFinal="";
+//             String cadena;
+//             while((cadena=br.readLine())!=null)
+//                cadenaFinal = cadenaFinal+cadena;
+//            System.out.println(cadenaFinal);
+//          }
+    }    
+

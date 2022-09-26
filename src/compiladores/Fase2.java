@@ -5,12 +5,10 @@
  */
 package compiladores;
 import java.io.BufferedReader; 
+import java.io.File;
 import java.io.FileNotFoundException; 
 import java.io.FileReader; 
 import java.io.IOException;
-import java.lang.ProcessBuilder.Redirect.Type;
-import jdk.nashorn.internal.runtime.regexp.joni.encoding.CharacterType;
-import java.lang.String;
 import java.util.ArrayList;
 /**
  *
@@ -30,36 +28,48 @@ public class Fase2{
             System.out.println(cadenaFinal);
         };
         public void leerTxt() throws FileNotFoundException, IOException{
-            String cadena;
-            FileReader file = new FileReader("C:\\Users\\guija\\Desktop\\Cadenas.txt");
-            BufferedReader buffered = new BufferedReader(file); 
-            cadena = buffered.readLine();
-            buffered.close();
+            File archivo = null;
+            FileReader fr = null;
+            BufferedReader br = null;
+            archivo = new File ("C:\\Users\\guija\\OneDrive\\Escritorio\\Cadenas.txt");
+            fr = new FileReader (archivo);
+            br = new BufferedReader(fr);
+            String cadenaTemp;
+            String cadena="";
+            while((cadenaTemp=br.readLine())!=null)
+                cadena = cadena+cadenaTemp;
             tempRenglon = cadena.toCharArray();
             lengthRenglon = tempRenglon.length;             
         }
-        public void defKeywords(String tempCadenaFinal){
+        public void evaluarKeywords(String tempCadenaFinal){
             Keywords.add("$CONST"); Keywords.add("$VAR"); Keywords.add("$ENTERO");
             Keywords.add("$DECIMAL"); Keywords.add("$CARACTER"); Keywords.add("$CADENA");
             Keywords.add("$BOOLEANO"); Keywords.add("$VOID"); Keywords.add("$LLAMAR");
             Keywords.add("$IF"); Keywords.add("$ELSE"); Keywords.add("$FOR");
             Keywords.add("$AND"); Keywords.add("$OR"); Keywords.add("$DIF");
             Keywords.add("$IGUAL"); Keywords.add("$FLOTANTE"); Keywords.add("$ENTONCES");
-            Keywords.add("$RETORNO"); Keywords.add("+"); Keywords.add("*");
-            Keywords.add("-"); Keywords.add("/"); Keywords.add("<"); Keywords.add(">");
-            Keywords.add("="); Keywords.add(":");
-            System.out.println(Keywords.get(10));
-            for(int i=0; i<19; i++){
-                if(tempCadenaFinal == Keywords.get(i)){
-                    // agregar código que imprima si es palabra reservada 
-                }
+            Keywords.add("$RETORNO");
+            Keywords.add("+"); Keywords.add("*"); Keywords.add("-"); Keywords.add("/"); 
+            Keywords.add("<"); Keywords.add(">"); Keywords.add("="); Keywords.add(":");
+            boolean valido = false;
+            for(int i=0; i<27; i++){
+                if(tempCadenaFinal.equals(Keywords.get(i))){                    
+                    valido = true;
+                    break;
+                }                       
+            }            
+            if(valido == true){
+                    System.out.println(tempCadenaFinal+" es válido.");
+                }else{
+                System.out.println(tempCadenaFinal+" no es válido.");
             }
         }
         public String evaluar(){            
             String cadenaFinal = "";          
             // identificadores    
             if(posicion < lengthRenglon){ //general
-                if(tempRenglon[posicion] == ' '){
+                int asciiBlanco = tempRenglon[posicion];
+                if((asciiBlanco == 32) || (asciiBlanco == 10) || (asciiBlanco == 13)){
                     posicion++;
                     return evaluar();
                 }
@@ -92,7 +102,7 @@ public class Fase2{
                         }
                         
                         imprimir(tempRenglon, cadenaFinal);   
-                        defKeywords(cadenaFinal);
+                        evaluarKeywords(cadenaFinal);
 //                        if(cadenaFinal.equals("$CONST")) {
 //                            int hola = 0;
 //                        }
@@ -118,10 +128,12 @@ public class Fase2{
                                 imprimir(tempRenglon, cadenaFinal);                 
                         }
                         else{
+                            //evaluarSimbolos(cadenaFinal);
                             if((tempRenglon[posicion] != '@') && (tempRenglon[posicion] != '$') && (Character.isDigit(tempRenglon[posicion]) == false)){
-                            cadenaFinal = cadenaFinal+tempRenglon[posicion];
-                            imprimir(tempRenglon, cadenaFinal);                
-                            posicion++;                            
+                                cadenaFinal = cadenaFinal+tempRenglon[posicion];
+                                imprimir(tempRenglon, cadenaFinal);                
+                                posicion++;
+                                evaluarKeywords(cadenaFinal);
                             }
                        }
                     }
@@ -138,11 +150,10 @@ public class Fase2{
         objeto1.evaluar();
         objeto1.evaluar();
         objeto1.evaluar();
-        objeto1.evaluar();
-        objeto1.evaluar();
-        //objeto1.defKeywords();
-        //objeto1.evaluar();
-                        
+        objeto1.evaluar();               
+        objeto1.evaluar();               
+        objeto1.evaluar();               
+        objeto1.evaluar();               
     }
     
 }
