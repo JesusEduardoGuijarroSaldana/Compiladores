@@ -21,7 +21,7 @@ public class Fase2{
         int lengthRenglon;
         int posicion=0;
         ArrayList<String> Keywords = new ArrayList<String>();
-        
+        ArrayList<String> palabrasList = new ArrayList<String>();
         // métodos
         public void imprimir(char [] tempRenglon, String cadenaFinal){
             System.out.println(tempRenglon);  
@@ -63,6 +63,14 @@ public class Fase2{
                 }else{
                 System.out.println(tempCadenaFinal+" no es válido.");
             }
+        }
+        public void palabrasLista(String palabra){
+            palabrasList.add(palabra);
+        }
+        public void palabrasListaImprimir(){
+            for(int i=0; i<palabrasList.size(); i++){
+                System.out.println(palabrasList.get(i));
+            }            
         }
         public String evaluar(){            
             String cadenaFinal = "";          
@@ -138,7 +146,8 @@ public class Fase2{
                        }
                     }
                 }
-            } //general            
+            } //general
+        palabrasLista(cadenaFinal);
     return cadenaFinal;
     }; 
     public Fase2(){ // constructor
@@ -153,7 +162,7 @@ public class Fase2{
         objeto1.evaluar();               
         objeto1.evaluar();               
         objeto1.evaluar();               
-        objeto1.evaluar();               
+        objeto1.evaluar();  
+        objeto1.palabrasListaImprimir();
     }
-    
 }
