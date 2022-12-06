@@ -25,6 +25,7 @@ public class Fase3{
         ArrayList<String> errorsList = new ArrayList<String>();
         boolean validarIdent = false; // para el método auxConst
         boolean validarNum = false; // para el método Num
+        int tamañoToken = 0;
         // métodos
         
         public void leerTxt() throws FileNotFoundException, IOException{
@@ -55,6 +56,7 @@ public class Fase3{
             Keywords.add("$RETORNO");
             Keywords.add("+"); Keywords.add("*"); Keywords.add("-"); Keywords.add("/"); 
             Keywords.add("<"); Keywords.add(">"); Keywords.add("="); Keywords.add(":");
+            Keywords.add("$PROGRAMA");
             boolean valido = false;
             for(int i=0; i<27; i++){
                 if(tempCadenaFinal.equals(Keywords.get(i))){                    
@@ -80,6 +82,7 @@ public class Fase3{
             String cadenaFinal = "";   
             validarIdent = false;
             validarNum = false;
+            tamañoToken = 0;
             // identificadores    
             if(posicion < lengthRenglon){ //general
                 int asciiBlanco = tempRenglon[posicion];
@@ -155,9 +158,13 @@ public class Fase3{
                     }
                 }
             } //general
+        tamañoToken = cadenaFinal.length(); // aquí guardamos el 4, en posición guardamos el 11
         palabrasLista(cadenaFinal);
     return cadenaFinal;
     };
+        public void devolver(){
+            posicion = posicion - tamañoToken;
+        }
         public void defErrors(){ // definición de errores
             errorsList.add("No se encontró la palabra 'Programa'"); // error 1
             errorsList.add("Se esperaba ':' o 'Final'.");           // error 2
@@ -175,14 +182,20 @@ public class Fase3{
             errorsList.add("Se esperaba un tipo de dato válido.");  // error 14
             errorsList.add("Se esperadaba un número o un identificador."); // error 15
             errorsList.add("Se esperaba la palabra '$FUNC'");       // error 16
-            errorsList.add("Se esperaba la palabra '$RETORNO'");       // error 17
+            errorsList.add("Se esperaba la palabra '$RETORNO'");    // error 17
             errorsList.add("Se esperaba la palabra '$ELSE'");       // error 18
-            errorsList.add("Se esperaba '+' o un '-'");       // error 19            
+            errorsList.add("Se esperaba '+' o un '-'");             // error 19            
             errorsList.add("Se esperaba un símbolo relacional");       // error 20            
+            errorsList.add("Se esperaba una ','");                      // error 21            
+            errorsList.add("Se esperaba un tipo de parámetro válido."); // error 22            
+            errorsList.add("Se esperaba un '+', '-', '*' o '/'.");      // error 23            
+            errorsList.add("Se esperaba un '$AND' o '$OR'.");           // error 24           
+            errorsList.add("Se esperaba un tipo de retorno válido.");   // error 25           
+            errorsList.add("Se esperaba la palabra '$VAR'");        // error 26           
         };
         public void programa(){
             String token = evaluar(); 
-            if(token.equals("Programa")){
+            if(token.equals("$PROGRAMA")){
                 encabezado();
                 instrucciones();
                 auxInstrucciones();
@@ -206,9 +219,9 @@ public class Fase3{
                             token = evaluar();
                             if(token.equals("$ENTONCES")){
                                 token = evaluar();
-                                if(token.equals('{')){
-                                    auxIF();
-                                    auxInstrucciones();
+                                if(token.equals('{')){                                                                        
+                                    instrucciones();
+                                    auxInstrucciones2();
                                     token = evaluar();
                                     if(token.equals('}')){
                                         auxElse();
@@ -254,7 +267,7 @@ public class Fase3{
                                                                 if(token.equals("$ENTONCES")){
                                                                     token = evaluar();
                                                                     if(token.equals('{')){
-                                                                        auxInstrucciones();
+                                                                        auxInstrucciones2();
                                                                         token = evaluar();
                                                                         if(token.equals('}')){
                                                                         }else
@@ -301,11 +314,11 @@ public class Fase3{
                 default:{                   
                     if(validarIdent == true){
                         token = evaluar();
-                        if(token.equals('=')){
+                        if(token.equals("=")){
                             auxIdent1();
                             auxIdent2();
                             token = evaluar();
-                            if(token.equals(':')){                                
+                            if(token.equals(":")){                                
                             }else
                                 System.out.println(errorsList.get(4));
                         }else
@@ -315,99 +328,126 @@ public class Fase3{
                 }                                                         
             }
         }
-        public void auxInstrucciones(){
-            String token = evaluar(); 
-            if(token.equals(':')){
-                instrucciones();
-                auxInstrucciones();
-            }
-            else if(token.equals("Final")){                
-            }else
-                System.out.println(errorsList.get(1));
-        }
-        public void auxConst(){
-            String token = evaluar();             
-            if(token.equals("$CONST")){
-                auxTipo();
-                token = evaluar();
-                if(validarIdent == true){
-                    token = evaluar();
-                    if(token.equals('=')){ //
-                        aux1(); 
-                        token = evaluar();
-                        if(token.equals(':')){
-                            auxConst();
-                        }else
-                            System.out.println(errorsList.get(5)); // error 6
-                    }else
-                        System.out.println(errorsList.get(4));// error 5
+        public void auxInstrucciones(){ // primer aux
+            String token = evaluar();         
+                if(token.equals(":")){
+                    instrucciones();
+                    auxInstrucciones();
+                }
+                else if(token.equals("$FINAL")){                
                 }else
-                    System.out.println(errorsList.get(3)); // error 4
+                    System.out.println(errorsList.get(1));
+        }
+        public void auxInstrucciones2(){
+            String token = evaluar();
+            if(!token.equals('}')){
+                if(token.equals(':')){
+                    instrucciones();
+                    auxInstrucciones2();
+                }else
+                    System.out.println(errorsList.get(5));
             }else
-                System.out.println(errorsList.get(2)); // error 3
+                devolver();                        
+        }
+        
+    @SuppressWarnings("UnusedAssignment")
+        public void auxConst(){
+            String token = evaluar();
+            if(!token.equals("$VAR") && !token.equals("$FUNC") && !token.equals("$IF") && !token.equals("$FOR")
+                    && !token.equals("$LLAMAR") && (validarIdent == false)){
+                if(token.equals("$CONST")){
+                    auxTipo();
+                    token = evaluar();
+                    if(validarIdent == true){
+                        token = evaluar();
+                        if(token.equals("=")){ //
+                            aux1(); 
+                            token = evaluar();
+                            if(token.equals(":")){
+                                auxConst();
+                            }else
+                                System.out.println(errorsList.get(5)); // error 6
+                        }else
+                            System.out.println(errorsList.get(4));// error 5
+                    }else
+                        System.out.println(errorsList.get(3)); // error 4
+                }else
+                    System.out.println(errorsList.get(2)); // error 3           
+            }else //Hacer que se devuelva al token anterior
+                devolver();
         }
         public void auxVar(){
             String token = evaluar();
-            if(token.equals("$VAR")){
-                auxTipo();
-                token = evaluar();
-                if(validarIdent == true){
+            if(!token.equals("$FUNC") && !token.equals("$IF") && !token.equals("$FOR")
+                    && !token.equals("$LLAMAR") && (validarIdent == false)){
+                if(token.equals("$VAR")){
+                    auxTipo();
                     token = evaluar();
-                    if(token.equals(':')){
-                        auxVar();
-                    }else 
-                        System.out.println(errorsList.get(5));
+                    if(validarIdent == true){
+                        token = evaluar();
+                        if(token.equals(":")){
+                            auxVar();
+                        }else 
+                            System.out.println(errorsList.get(5));
+                    }else
+                        System.out.println(errorsList.get(3));
                 }else
-                    System.out.println(errorsList.get(3));
-            }// falta el epsilon y el error 
+                    System.out.println(errorsList.get(25));
+            }else// falta el epsilon y el error 
+                devolver();
         }
+    @SuppressWarnings("UnusedAssignment")
         public void auxFunc(){
             String token = evaluar();
-            if(token.equals("$FUNC")){
-                tipoRetorno();
-                token = evaluar();
-                if(validarIdent == true){
-                    parametros();
+            if(!token.equals("$IF") && !token.equals("$FOR") && !token.equals("$LLAMAR") 
+                    && (validarIdent == false)){
+                if(token.equals("$FUNC")){
+                    tipoRetorno();
                     token = evaluar();
-                    if(token.equals('(')){
+                    if(validarIdent == true){
+                        parametros();
                         token = evaluar();
-                        if(validarIdent == true){
-                            auxFuncIdent();
+                        if(token.equals("(")){
                             token = evaluar();
-                            if(token.equals(')')){
+                            if(validarIdent == true){
+                                auxFuncIdent();
                                 token = evaluar();
-                                if(token.equals('{')){
-                                    instrucciones();
-                                    auxFuncIntrucciones();
+                                if(token.equals(")")){
                                     token = evaluar();
-                                    if(token.equals("$RETORNO")){
+                                    if(token.equals("{")){
+                                        instrucciones();
+                                        auxFuncIntrucciones();
                                         token = evaluar();
-                                        if(validarIdent == true){
+                                        if(token.equals("$RETORNO")){
                                             token = evaluar();
-                                            if(token.equals(':')){
+                                            if(validarIdent == true){
                                                 token = evaluar();
-                                                if(token.equals('}')){
-                                                    auxFunc();
+                                                if(token.equals(":")){
+                                                    token = evaluar();
+                                                    if(token.equals("}")){
+                                                        auxFunc();
+                                                    }else
+                                                        System.out.println(errorsList.get(10));
                                                 }else
-                                                    System.out.println(errorsList.get(10));
+                                                    System.out.println(errorsList.get(5));
                                             }else
-                                                System.out.println(errorsList.get(5));
+                                                System.out.println(errorsList.get(3));
                                         }else
-                                            System.out.println(errorsList.get(3));
+                                            System.out.println(errorsList.get(16));
                                     }else
-                                        System.out.println(errorsList.get(16));
+                                        System.out.println(errorsList.get(9));
                                 }else
-                                    System.out.println(errorsList.get(9));
+                                    System.out.println(errorsList.get(7));
                             }else
-                                System.out.println(errorsList.get(7));
+                                System.out.println(errorsList.get(3));
                         }else
-                            System.out.println(errorsList.get(3));
+                            System.out.println(errorsList.get(6));
                     }else
-                        System.out.println(errorsList.get(6));
+                        System.out.println(errorsList.get(3));
                 }else
-                    System.out.println(errorsList.get(3));
+                    System.out.println(errorsList.get(15));
             }else
-                System.out.println(errorsList.get(15));
+                devolver();
             // falta epsilon
         }
         public void auxTipo(){
@@ -424,12 +464,12 @@ public class Fase3{
             String token = evaluar(); 
             if(validarNum == true){
                 token = evaluar();
-                if(token.equals(':')){
+                if(token.equals(":")){
                 }else
                     System.out.println(errorsList.get(5));
             }else if(validarIdent == true){
                 token = evaluar();
-                if(token.equals(':')){
+                if(token.equals(":")){
                 }else
                     System.out.println(errorsList.get(5));
             }else
@@ -441,22 +481,23 @@ public class Fase3{
             auxCond1();
             auxCond2();
         }
-        public void auxIF(){}
         public void auxElse(){
             String token = evaluar();
-            if(token.equals("$ELSE")){
-                token = evaluar();
-                if(token.equals('{')){
-                    auxInstrucciones();
-                    token = evaluar();                    
-                    if(token.equals('}')){
+            if(!token.equals(":") && !token.equals("$FINAL")){
+                if(token.equals("$ELSE")){
+                    token = evaluar();
+                    if(token.equals("{")){
+                        auxInstrucciones();
+                        token = evaluar();                    
+                        if(token.equals("}")){
+                        }else
+                            System.out.println(errorsList.get(10));
                     }else
-                        System.out.println(errorsList.get(10));
+                        System.out.println(errorsList.get(9));
                 }else
-                    System.out.println(errorsList.get(9));
-            }else
-                System.out.println(errorsList.get(17));
-            // falta epsilon 
+                    System.out.println(errorsList.get(17));
+            }else// falta epsilon 
+                devolver();
         }
         public void auxFor1(){
             String token = evaluar();
@@ -467,7 +508,7 @@ public class Fase3{
         public void simbRel(){
             String token = evaluar();
             if(token.equals("<")){
-            }else if(token.equals('>')){
+            }else if(token.equals(">")){
             }else if(token.equals("$DIF")){
             }else if(token.equals("$IGUAL")){
             }else
@@ -475,38 +516,137 @@ public class Fase3{
         }
         public void auxFor2(){
             String token = evaluar();
-            if(token.equals('+')){
-            }else if(token.equals('-')){
+            if(token.equals("+")){
+            }else if(token.equals("-")){
             }else
                 System.out.println(errorsList.get(18));
         }
-        public void parametros(){}
-        public void auxParametros(){}
-        public void auxIdent1(){}
-        public void auxIdent2(){}
-        public void auxCond1(){}
-        public void auxCond2(){}
-        public void tipoRetorno(){}
-        public void auxFuncIdent(){
+        public void parametros(){
             String token = evaluar();
-            if(token.equals(',')){
+            if(token.equals("$ENTERO")){
                 token = evaluar();
                 if(validarIdent == true){
-                    auxFuncIdent();
+                }
+            }else if(token.equals("$DECIMAL")){
+                token = evaluar();
+                if(validarIdent == true){
+                }
+            }else if(token.equals("$FLOTANTE")){
+                token = evaluar();
+                if(validarIdent == true){
+                }
+            }else if(token.equals("$BOOLEANO")){
+                token = evaluar();
+                if(validarIdent == true){
+                }
+            }else if(token.equals("$CARACTER")){
+                token = evaluar();
+                if(validarIdent == true){
+                }
+            }else
+                System.out.println(errorsList.get(21));
+        }
+        public void auxParametros(){
+            String token = evaluar();
+            if(!token.equals(")")){
+                if(token.equals(",")){
+                    parametros();
+                    auxParametros();
                 }else
-                    System.out.println(errorsList.get(3));
+                    System.out.println(errorsList.get(20));
+            }else
+                devolver();
+        }
+        public void auxIdent1(){
+            String token = evaluar();
+            if(validarIdent == true){
+            }else if(validarNum == true){                
+            }else
+                System.out.println(errorsList.get(14));
+        }
+        public void auxIdent2(){
+            String token = evaluar();
+            if(!token.equals(":") && !token.equals("Final")){
+                if(token.equals("+")){
+                    auxIdent1();
+                }else if(token.equals("-")){
+                    auxIdent1();
+                }else if(token.equals("*")){
+                    auxIdent1();
+                }else if(token.equals("/")){
+                    auxIdent1();
+                }else
+                    System.out.println(errorsList.get(22));
+            }else
+                devolver();
+        }
+        public void auxCond1(){
+            String token = evaluar();
+            if(validarIdent == true){                
+            }else if(validarNum == true){
+            }else
+                System.out.println(errorsList.get(14));
+        }
+        public void auxCond2(){
+            String token = evaluar();
+            if(!token.equals("}")){
+            
+                if(token.equals("$AND")){
+                    condicion();
+                }else if(token.equals("$OR")){
+                    condicion();
+                }else
+                    System.out.println(errorsList.get(23));
+            }else
+                devolver();
+        }
+        public void tipoRetorno(){
+            String token = evaluar();
+            switch(token){
+                case "$ENTERO":{
+                }
+                case "$DECIMAL":{
+                }
+                case "$FLOTANTE":{
+                }
+                case "$BOOLEANO":{
+                }
+                case "$CARACTER":{
+                }
+                case "$VOID":{
+                }
+                default:{
+                    System.out.println(errorsList.get(24));
+                }                
             }
-            // FALTA EPSILON Y ERROR
+        }
+        public void auxFuncIdent(){
+            String token = evaluar();
+            if(!token.equals(")")){
+                if(token.equals(",")){
+                    token = evaluar();
+                    if(validarIdent == true){
+                        auxFuncIdent();
+                    }else
+                        System.out.println(errorsList.get(3));
+                }else
+                    System.out.println(errorsList.get(20));
+            }else// FALTA EPSILON Y ERROR
+                devolver();
         }
         public void auxFuncIntrucciones(){
             String token = evaluar();
-            if(token.equals(':')){
-                token = evaluar();
-                if(validarIdent == true){
-                    auxFuncIntrucciones();
+            if(!token.equals("$RETORNO")){
+                if(token.equals(":")){
+                    token = evaluar();
+                    if(validarIdent == true){
+                        auxFuncIntrucciones();
+                    }else
+                        System.out.println(errorsList.get(3));
                 }else
-                    System.out.println(errorsList.get(3));
-            }
+                    System.out.println(errorsList.get(5));
+            }else
+                devolver();
             // agregar epsilon y error 
         }
     public Fase3(){ // constructor
@@ -515,7 +655,7 @@ public class Fase3{
         Fase3 objeto1;
         objeto1 = new Fase3();
         objeto1.leerTxt();
-//        objeto1.evaluar();
+        objeto1.programa();
 //        objeto1.evaluar();
 //        objeto1.evaluar();
 //        objeto1.evaluar();               
